@@ -5,6 +5,7 @@ import { Upload } from './upload.entity';
 import { UploadDto, EntityType } from './dto/upload.dto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Express } from 'express';
 
 @Injectable()
 export class UploadService {

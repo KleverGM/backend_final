@@ -24,6 +24,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../auth/entities/user.entity';
+import { Express } from 'express';
 
 @ApiTags('Uploads')
 @Controller('uploads')
