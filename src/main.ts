@@ -20,7 +20,11 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: configService.get('cors.origin') || process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'https://motoshop-y83r.onrender.com', // backend
+      'https://TU_DOMINIO_FRONTEND.com' // reemplaza por tu dominio de frontend si lo tienes
+    ],
     credentials: true,
   });
 
