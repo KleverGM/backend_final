@@ -6,6 +6,7 @@ import { UploadDto, EntityType } from './dto/upload.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Express } from 'express';
+// import type { File as MulterFile } from 'multer';
 
 @Injectable()
 export class UploadService {
