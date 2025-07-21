@@ -22,8 +22,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:5173',
-      'https://motoshop-y83r.onrender.com', // backend
-      'https://TU_DOMINIO_FRONTEND.com' // reemplaza por tu dominio de frontend si lo tienes
+      // Agrega aquí tu dominio de frontend en producción si lo tienes, por ejemplo:
+      // 'https://mi-frontend.com'
     ],
     credentials: true,
   });
