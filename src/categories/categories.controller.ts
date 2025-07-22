@@ -13,6 +13,9 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { CloudinaryService } from '../upload/cloudinary.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -21,7 +24,33 @@ import { UserRole } from '../auth/entities/user.entity';
 @ApiTags('Categories')
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
+  @Patch(':id/image')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Subir o actualizar imagen de categoría (Admin)' })
+  @ApiResponse({ status: 200, description: 'Imagen de categoría actualizada correctamente' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCategoryImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      return { message: 'No se proporcionó archivo', data: null };
+    }
+    // Subir imagen a Cloudinary
+    const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'categories');
+    // Actualizar categoría
+    const category = await this.categoriesService.update(id, { imageUrl });
+    return {
+      message: 'Imagen de categoría actualizada correctamente',
+      data: category,
+    };
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

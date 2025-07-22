@@ -31,6 +31,15 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({
+    example: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport.jpg',
+    description: 'URL de la imagen de la categoría',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }
 
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
@@ -50,6 +59,9 @@ export class CategoryResponseDto {
 
   @ApiProperty()
   motorcycleCount?: number;
+
+  @ApiProperty({ example: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport.jpg', description: 'URL de la imagen de la categoría', required: false })
+  imageUrl?: string;
 
   @ApiProperty()
   createdAt: Date;
