@@ -10,6 +10,8 @@ import {
 } from 'typeorm';
 import { Sale } from '../../sales/entities/sale.entity';
 import { Customer } from '../../customers/entities/customer.entity';
+import { OneToMany } from 'typeorm';
+import { InvoiceItem } from './invoice-item.entity';
 
 export enum InvoiceStatus {
   DRAFT = 'draft',
@@ -82,6 +84,9 @@ export class Invoice {
 
   @Column('uuid')
   customerId: string;
+
+  @OneToMany(() => InvoiceItem, item => item.invoice, { cascade: true, eager: true })
+  items: InvoiceItem[];
 
   // Computed properties
   get balanceAmount(): number {

@@ -28,25 +28,4 @@ export class LoginDto {
   password: string;
 }
 
-export class UpdateUserDto {
-  @IsOptional()
-  @IsString()
-  firstName?: string;
-
-  @IsOptional()
-  @IsString()
-  lastName?: string;
-
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @IsOptional()
-  @IsString()
-  @MinLength(6)
-  password?: string;
-
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
-}
+// ...eliminado UpdateUserDto duplicado. Usar el de update-user.dto.ts

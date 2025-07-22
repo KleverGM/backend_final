@@ -1,3 +1,6 @@
+import { CloudinaryService } from '../upload/cloudinary.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
 import {
   Controller,
   Get,
@@ -26,7 +29,29 @@ import { RequestWithUser } from '../common/interfaces/auth.interfaces';
 @ApiTags('Motorcycles')
 @Controller('motorcycles')
 export class MotorcyclesController {
-  constructor(private readonly motorcyclesService: MotorcyclesService) {}
+  constructor(
+    private readonly motorcyclesService: MotorcyclesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
+  /**
+   * Subir imagen de moto a Cloudinary y devolver la URL
+   */
+  @Post('upload-image')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SELLER)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadMotorcycleImage(
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      return { message: 'No se proporcionó archivo', data: null };
+    }
+    const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+    return {
+      message: 'Imagen de moto subida correctamente',
+      url: imageUrl,
+    };
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

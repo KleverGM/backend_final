@@ -5,11 +5,13 @@ import { MotorcyclesService } from './motorcycles.service';
 import { Motorcycle } from './entities/motorcycle.entity';
 import { Category } from '../categories/entities/category.entity';
 import { MongodbModule } from '../mongodb/mongodb.module';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Motorcycle, Category]),
     MongodbModule,
+    UploadModule,
   ],
   controllers: [MotorcyclesController],
   providers: [MotorcyclesService],

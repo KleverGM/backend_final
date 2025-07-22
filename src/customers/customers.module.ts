@@ -11,9 +11,13 @@ import { Wishlist } from './entities/wishlist.entity';
 import { Review } from './entities/review.entity';
 import { User } from '../auth/entities/user.entity';
 import { Motorcycle } from '../motorcycles/entities/motorcycle.entity';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer, User, Wishlist, Review, Motorcycle])],
+  imports: [
+    TypeOrmModule.forFeature([Customer, User, Wishlist, Review, Motorcycle]),
+    UploadModule,
+  ],
   controllers: [CustomersController, WishlistController, ReviewController],
   providers: [CustomersService, WishlistService, ReviewService],
   exports: [CustomersService, WishlistService, ReviewService],

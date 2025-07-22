@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Motorcycle } from '../motorcycles/entities/motorcycle.entity';
 import { Invoice, InvoiceStatus } from './entities/invoice.entity';
-import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/invoice.dto';
+import { CreateInvoiceDto, UpdateInvoiceDto, InvoiceItemDto } from './dto/invoice.dto';
 import { UserRole } from '../auth/entities/user.entity';
 
 @Injectable()
@@ -10,6 +11,8 @@ export class InvoicesService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
+    @InjectRepository(Motorcycle)
+    private readonly motorcycleRepository: Repository<Motorcycle>,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto, createdById: string): Promise<Invoice> {
@@ -38,6 +41,45 @@ export class InvoicesService {
     
     // Para notes, que es nullable pero debe ser string si se proporciona
     newInvoice.notes = createInvoiceDto.notes || '';
+
+    // Validaciones de items
+    if (!createInvoiceDto.items || !Array.isArray(createInvoiceDto.items) || createInvoiceDto.items.length === 0) {
+      throw new Error('Invoice must have at least one item');
+    }
+    const { InvoiceItem } = await import('./entities/invoice-item.entity');
+    const productIds = new Set();
+    newInvoice.items = [];
+    let subtotalCalc = 0;
+    for (const itemDto of createInvoiceDto.items) {
+      // Validar duplicados
+      if (productIds.has(itemDto.productId)) {
+        throw new Error('Duplicate product in items');
+      }
+      productIds.add(itemDto.productId);
+      // Validar existencia de producto
+      const product = await this.motorcycleRepository.findOne({ where: { id: itemDto.productId } });
+      if (!product) throw new Error(`Product not found: ${itemDto.productId}`);
+      // Validar cantidad y precios
+      if (!itemDto.quantity || itemDto.quantity <= 0) throw new Error('Quantity must be greater than 0');
+      if (!itemDto.unitPrice || itemDto.unitPrice < 0) throw new Error('Unit price must be >= 0');
+      if (!itemDto.totalPrice || itemDto.totalPrice < 0) throw new Error('Total price must be >= 0');
+      subtotalCalc += itemDto.totalPrice;
+      const item = new InvoiceItem();
+      item.productId = itemDto.productId;
+      item.productName = itemDto.productName;
+      item.quantity = itemDto.quantity;
+      item.unitPrice = itemDto.unitPrice;
+      item.totalPrice = itemDto.totalPrice;
+      newInvoice.items.push(item);
+    }
+
+    // Validar totales
+    if (Math.abs(subtotalCalc - createInvoiceDto.subtotal) > 0.01) {
+      throw new Error('Subtotal does not match sum of item totals');
+    }
+    if (Math.abs((createInvoiceDto.subtotal + createInvoiceDto.tax) - createInvoiceDto.total) > 0.01) {
+      throw new Error('Total does not match subtotal + tax');
+    }
 
     // Save the new invoice
     return await this.invoiceRepository.save(newInvoice);
@@ -78,8 +120,8 @@ export class InvoicesService {
 
   async update(id: string, updateInvoiceDto: UpdateInvoiceDto): Promise<Invoice> {
     const invoice = await this.findOne(id, { role: UserRole.ADMIN }); // Use admin role to bypass customer check
-    
-    // Update only the fields that are present in the DTO
+
+    // Actualizar campos básicos
     if (updateInvoiceDto.customerId !== undefined) invoice.customerId = updateInvoiceDto.customerId;
     if (updateInvoiceDto.saleId !== undefined) invoice.saleId = updateInvoiceDto.saleId;
     if (updateInvoiceDto.status !== undefined) invoice.status = updateInvoiceDto.status;
@@ -89,6 +131,48 @@ export class InvoicesService {
     if (updateInvoiceDto.notes !== undefined) invoice.notes = updateInvoiceDto.notes || '';
     if (updateInvoiceDto.issueDate) invoice.issueDate = new Date(updateInvoiceDto.issueDate);
     if (updateInvoiceDto.dueDate) invoice.dueDate = new Date(updateInvoiceDto.dueDate);
+
+    // Si se reciben items, reemplazar los existentes por los nuevos (solo Admin/Seller)
+    if (updateInvoiceDto.items && Array.isArray(updateInvoiceDto.items)) {
+      if (updateInvoiceDto.items.length === 0) throw new Error('Invoice must have at least one item');
+      const { InvoiceItem } = await import('./entities/invoice-item.entity');
+      const productIds = new Set();
+      const items: any[] = [];
+      let subtotalCalc = 0;
+      for (const itemDto of updateInvoiceDto.items) {
+        if (productIds.has(itemDto.productId)) {
+          throw new Error('Duplicate product in items');
+        }
+        productIds.add(itemDto.productId);
+        const product = await this.motorcycleRepository.findOne({ where: { id: itemDto.productId } });
+        if (!product) throw new Error(`Product not found: ${itemDto.productId}`);
+        if (!itemDto.quantity || itemDto.quantity <= 0) throw new Error('Quantity must be greater than 0');
+        if (!itemDto.unitPrice || itemDto.unitPrice < 0) throw new Error('Unit price must be >= 0');
+        if (!itemDto.totalPrice || itemDto.totalPrice < 0) throw new Error('Total price must be >= 0');
+        subtotalCalc += itemDto.totalPrice;
+        const item = new InvoiceItem();
+        item.productId = itemDto.productId;
+        item.productName = itemDto.productName;
+        item.quantity = itemDto.quantity;
+        item.unitPrice = itemDto.unitPrice;
+        item.totalPrice = itemDto.totalPrice;
+        items.push(item);
+      }
+      invoice.items = items;
+
+      // Validar totales
+      if (updateInvoiceDto.subtotal !== undefined && Math.abs(subtotalCalc - updateInvoiceDto.subtotal) > 0.01) {
+        throw new Error('Subtotal does not match sum of item totals');
+      }
+      if (
+        updateInvoiceDto.subtotal !== undefined &&
+        updateInvoiceDto.tax !== undefined &&
+        updateInvoiceDto.total !== undefined &&
+        Math.abs((updateInvoiceDto.subtotal + updateInvoiceDto.tax) - updateInvoiceDto.total) > 0.01
+      ) {
+        throw new Error('Total does not match subtotal + tax');
+      }
+    }
 
     return await this.invoiceRepository.save(invoice);
   }

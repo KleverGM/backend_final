@@ -154,20 +154,4 @@ export class RefreshTokenDto {
   refreshToken: string;
 }
 
-export class UpdateUserDto {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiProperty({ required: false, minLength: 6 })
-  @IsOptional()
-  @IsString()
-  @MinLength(6)
-  password?: string;
-
-  @ApiProperty({ enum: UserRole, required: false })
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
-}
+// ...eliminado UpdateUserDto duplicado. Usar el de update-user.dto.ts

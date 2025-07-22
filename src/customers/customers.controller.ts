@@ -12,6 +12,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
+import { UploadService } from '../upload/upload.service';
+import { CloudinaryService } from '../upload/cloudinary.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
+import { EntityType } from '../upload/dto/upload.dto';
 import { CreateCustomerDto, UpdateCustomerDto } from './dto/customer.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -21,7 +26,37 @@ import { RequestWithUser } from '../common/interfaces/auth.interfaces';
 
 @Controller('customers')
 export class CustomersController {
-  constructor(private readonly customersService: CustomersService) {}
+  constructor(
+    private readonly customersService: CustomersService,
+    private readonly uploadService: UploadService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
+  /**
+   * Permite a un customer subir y asociar su imagen de perfil
+   */
+  @Patch('profile/image')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Request() req: RequestWithUser,
+  ) {
+    if (!file) {
+      return { message: 'No se proporcionó archivo', data: null };
+    }
+    const customer = await this.customersService.findByUserId(req.user.id);
+    // Subir imagen a Cloudinary
+    const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'profiles');
+    // Actualizar campo profileImageUrl
+    const updatedCustomer = await this.customersService.updateProfileImage(
+      customer.id,
+      imageUrl,
+    );
+    return {
+      message: 'Imagen de perfil actualizada',
+      data: updatedCustomer,
+    };
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

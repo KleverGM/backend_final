@@ -4,6 +4,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { Upload } from './upload.entity';
+import { CloudinaryService } from './cloudinary.service';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { Upload } from './upload.entity';
     }),
   ],
   controllers: [UploadController],
-  providers: [UploadService],
-  exports: [UploadService],
+  providers: [UploadService, CloudinaryService],
+  exports: [UploadService, CloudinaryService],
 })
 export class UploadModule {}
