@@ -5,6 +5,7 @@ export interface JwtPayload {
   sub: string; // User ID
   email: string;
   role: string;
+  roles: string[];
   iat?: number;
   exp?: number;
 }
@@ -38,6 +39,7 @@ export interface LoginResponse extends AuthTokens {
     firstName: string;
     lastName: string;
     role: string;
+    roles: string[];
     customer?: {
       id: string;
       firstName: string;

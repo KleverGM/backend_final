@@ -115,6 +115,7 @@ export class AuthController {
       firstName: user?.firstName,
       lastName: user?.lastName,
       role: user?.role,
+      roles: user?.role ? [user.role] : [],
       isActive: user?.isActive,
       customer: user?.customer ? {
         id: user.customer.id,

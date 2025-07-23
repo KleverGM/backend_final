@@ -98,6 +98,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      roles: [user.role],
     };
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -146,6 +147,7 @@ export class AuthService {
           firstName: userWithDetails.firstName,
           lastName: userWithDetails.lastName,
           role: user.role,
+          roles: [user.role],
           customer: userWithDetails.customer ? {
             id: userWithDetails.customer.id,
             firstName: userWithDetails.customer.firstName,
@@ -197,6 +199,7 @@ export class AuthService {
           firstName: savedUser.firstName,
           lastName: savedUser.lastName,
           role: savedUser.role,
+          roles: [savedUser.role],
         },
       };
     } catch (error) {
@@ -253,6 +256,7 @@ export class AuthService {
           firstName: savedUser.firstName,
           lastName: savedUser.lastName,
           role: savedUser.role,
+          roles: [savedUser.role],
         },
       };
     } catch (error) {
@@ -302,6 +306,7 @@ export class AuthService {
           firstName: savedUser.firstName,
           lastName: savedUser.lastName,
           role: savedUser.role,
+          roles: [savedUser.role],
         },
       };
     } catch (error) {
@@ -367,6 +372,7 @@ export class AuthService {
           firstName: savedUser.firstName,
           lastName: savedUser.lastName,
           role: savedUser.role,
+          roles: [savedUser.role],
           customer: {
             id: savedCustomer.id,
             firstName: savedCustomer.firstName,
@@ -415,6 +421,7 @@ export class AuthService {
           firstName: userWithCustomer.firstName,
           lastName: userWithCustomer.lastName,
           role: user.role,
+          roles: [user.role],
           customer: userWithCustomer.customer ? {
             id: userWithCustomer.customer.id,
             firstName: userWithCustomer.customer.firstName,
@@ -462,6 +469,7 @@ export class AuthService {
           firstName: userWithDetails.firstName,
           lastName: userWithDetails.lastName,
           role: user.role,
+          roles: [user.role],
         },
       };
     } catch (error) {
@@ -504,6 +512,7 @@ export class AuthService {
           firstName: userWithDetails.firstName,
           lastName: userWithDetails.lastName,
           role: user.role,
+          roles: [user.role],
         },
       };
     } catch (error) {
@@ -530,6 +539,7 @@ export class AuthService {
         sub: user.id,
         email: user.email,
         role: user.role,
+        roles: [user.role],
       };
 
       return {
