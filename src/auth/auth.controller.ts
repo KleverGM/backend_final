@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { 
   Controller, 
   Post, 
@@ -27,6 +28,41 @@ import { RequestWithUser } from '../common/interfaces/auth.interfaces';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  @UseGuards(JwtAuthGuard)
+  @Patch('change-password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cambiar mi contraseña (solo usuario autenticado)' })
+  @ApiResponse({ status: 200, description: 'Contraseña cambiada correctamente' })
+  async changePassword(
+    @Request() req: RequestWithUser,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    await this.authService.changePassword(req.user.id, changePasswordDto);
+    return { message: 'Contraseña cambiada correctamente' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar mi perfil (cualquier usuario autenticado)' })
+  @ApiResponse({ status: 200, description: 'Perfil actualizado correctamente' })
+  async updateOwnProfile(
+    @Body() updateUserDto: UpdateUserDto,
+    @Request() req: RequestWithUser,
+  ) {
+    const updatedUser = await this.authService.updateUser(req.user.id, updateUserDto, req.user.id);
+    return {
+      message: 'Perfil actualizado correctamente',
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        role: updatedUser.role,
+        isActive: updatedUser.isActive,
+      }
+    };
+  }
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user (general)' })

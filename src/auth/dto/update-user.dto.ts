@@ -1,8 +1,26 @@
+
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsBoolean, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsBoolean, IsStrongPassword, IsString } from 'class-validator';
 import { UserRole } from '../entities/user.entity';
 
 export class UpdateUserDto {
+  @ApiProperty({
+    description: 'Nombre del usuario',
+    example: 'Juan',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({
+    description: 'Apellido del usuario',
+    example: 'Pérez',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
   @ApiProperty({
     description: 'Correo electrónico del usuario',
     example: 'usuario@ejemplo.com',
@@ -16,17 +34,6 @@ export class UpdateUserDto {
     description: 'Nueva contraseña del usuario',
     required: false
   })
-  @IsOptional()
-  @IsStrongPassword({
-    minLength: 8,
-    minLowercase: 1,
-    minUppercase: 1,
-    minNumbers: 1,
-    minSymbols: 1,
-  }, {
-    message: 'La contraseña debe tener al menos 8 caracteres, una minúscula, una mayúscula, un número y un símbolo'
-  })
-  password?: string;
 
   @ApiProperty({
     description: 'Rol del usuario',

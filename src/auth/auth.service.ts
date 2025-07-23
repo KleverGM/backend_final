@@ -1,3 +1,4 @@
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { Injectable, UnauthorizedException, ConflictException, Logger, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,6 +23,18 @@ import { getErrorMessage } from '../common/types/error.types';
 
 @Injectable()
 export class AuthService {
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    const isPasswordValid = await bcrypt.compare(changePasswordDto.currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new Error('La contraseña actual es incorrecta');
+    }
+    const hashedPassword = await bcrypt.hash(changePasswordDto.newPassword, 12);
+    await this.userRepository.update(userId, { password: hashedPassword });
+  }
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
@@ -589,16 +602,17 @@ export class AuthService {
       }
     }
 
-    // Si se proporciona una nueva contraseña, hashearla
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 12);
-    }
 
-    // Actualizar el usuario
-    await this.userRepository.update(id, {
-      ...updateUserDto,
-      updatedAt: new Date(),
-    });
+    const isSelfUpdate = id === adminId;
+    const updateFields: Partial<User> = {};
+    if (typeof updateUserDto.email === 'string') updateFields.email = updateUserDto.email;
+    if (!isSelfUpdate && typeof updateUserDto.role === 'string') updateFields.role = updateUserDto.role;
+    if (typeof updateUserDto.isActive === 'boolean') updateFields.isActive = updateUserDto.isActive;
+    if (typeof updateUserDto.firstName === 'string') updateFields.firstName = updateUserDto.firstName;
+    if (typeof updateUserDto.lastName === 'string') updateFields.lastName = updateUserDto.lastName;
+    updateFields.updatedAt = new Date();
+
+    await this.userRepository.update(id, updateFields);
 
     // Obtener y retornar el usuario actualizado
     const updatedUser = await this.userRepository.findOne({
