@@ -35,7 +35,7 @@ export class CartItem {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => Customer, customer => customer.cartItems)
+  @ManyToOne(() => Customer, customer => customer.cartItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'customerId' })
   customer: Customer;
 

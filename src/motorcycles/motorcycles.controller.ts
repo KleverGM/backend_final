@@ -1,6 +1,4 @@
-import { CloudinaryService } from '../upload/cloudinary.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadedFile, UseInterceptors } from '@nestjs/common';
+
 import {
   Controller,
   Get,
@@ -15,7 +13,10 @@ import {
   HttpStatus,
   Put,
   Request,
+  UseInterceptors,
+  UploadedFile
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MotorcyclesService } from './motorcycles.service';
 import { CreateMotorcycleDto, UpdateMotorcycleDto } from './dto/motorcycle.dto';
@@ -25,6 +26,8 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../auth/entities/user.entity';
 import { MotorcycleStatus } from './entities/motorcycle.entity';
 import { RequestWithUser } from '../common/interfaces/auth.interfaces';
+import { CloudinaryService } from '../upload/cloudinary.service';
+import { Express } from 'express';
 
 @ApiTags('Motorcycles')
 @Controller('motorcycles')
@@ -41,7 +44,7 @@ export class MotorcyclesController {
   @Roles(UserRole.ADMIN, UserRole.SELLER)
   @UseInterceptors(FileInterceptor('file'))
   async uploadMotorcycleImage(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
   ) {
     if (!file) {
       return { message: 'No se proporcionó archivo', data: null };
@@ -62,7 +65,7 @@ export class MotorcyclesController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file'))
   async create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() createMotorcycleDto: CreateMotorcycleDto
   ) {
     const motorcycle = await this.motorcyclesService.create(createMotorcycleDto, file);
@@ -137,7 +140,7 @@ export class MotorcyclesController {
   @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: any,
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
     @Request() req: RequestWithUser,
   ) {
