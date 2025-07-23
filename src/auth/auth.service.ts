@@ -10,6 +10,7 @@ import { RegisterCustomerDto, RegisterAdminDto, RegisterSellerDto, LoginCustomer
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Customer } from '../customers/entities/customer.entity';
 import { CartService } from '../cart/cart.service';
+import { SalesService } from '../sales/sales.service';
 import { 
   JwtPayload, 
   ValidatedUser, 
@@ -32,6 +33,8 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => CartService))
     private readonly cartService: CartService,
+    @Inject(forwardRef(() => SalesService))
+    private readonly salesService: SalesService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<ValidatedUser | null> {
@@ -628,6 +631,17 @@ export class AuthService {
     // Si el usuario tiene un customer relacionado, eliminar sus cart_items primero
     if (user.customer) {
       await this.cartService.clearCart(user.customer.id);
+      // Cancelar todas las ventas donde sea customer
+      const customerSales = await this.salesService.findAll({ customerId: user.customer.id });
+      for (const sale of customerSales) {
+        await this.salesService.remove(sale.id);
+      }
+    }
+
+    // Cancelar todas las ventas donde sea seller
+    const sellerSales = await this.salesService.findAll({ sellerId: user.id });
+    for (const sale of sellerSales) {
+      await this.salesService.remove(sale.id);
     }
 
     await this.userRepository.remove(user);
