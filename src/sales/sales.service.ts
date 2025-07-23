@@ -236,25 +236,29 @@ export class SalesService {
   
   async remove(id: string): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
-    
+
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
-      
+
       const sale = await this.findOne(id);
-      
+
       // Permitir cancelar cualquier venta, incluso si está COMPLETED o REFUNDED
-      
+
       // Soft delete - mark as cancelled and update database
       sale.status = SaleStatus.CANCELLED;
       sale.isDeleted = true;
       sale.cancelledAt = new Date();
-      
+
+      // Desvincular el sellerId para evitar error de clave foránea al eliminar el usuario
+      sale.sellerId = null;
+      sale.seller = null;
+
       await queryRunner.manager.save(Sale, sale);
-      
+
       // Release any reserved inventory (optional)
       // Logic to release inventory items would go here
-      
+
       await queryRunner.commitTransaction();
       this.logger.log(`Sale with ID: ${id} has been deleted/cancelled`);
     } catch (error) {

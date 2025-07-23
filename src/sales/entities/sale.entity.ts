@@ -124,12 +124,12 @@ export class Sale {
   @Column('uuid')
   customerId: string;
 
-  @ManyToOne(() => User, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => User, { onDelete: 'RESTRICT', nullable: true })
   @JoinColumn()
-  seller: User; // The seller who made the sale
+  seller: User | null; // The seller who made the sale
 
-  @Column('uuid')
-  sellerId: string;
+  @Column('uuid', { nullable: true })
+  sellerId: string | null;
 
   @OneToMany(() => SaleItem, (saleItem) => saleItem.sale, {
     cascade: true,
