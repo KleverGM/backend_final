@@ -243,10 +243,7 @@ export class SalesService {
       
       const sale = await this.findOne(id);
       
-      // Check if the sale can be deleted
-      if (sale.status === SaleStatus.COMPLETED || sale.status === SaleStatus.REFUNDED) {
-        throw new ConflictException(`Cannot delete sale with status ${sale.status}`);
-      }
+      // Permitir cancelar cualquier venta, incluso si está COMPLETED o REFUNDED
       
       // Soft delete - mark as cancelled and update database
       sale.status = SaleStatus.CANCELLED;
