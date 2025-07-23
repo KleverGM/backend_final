@@ -12,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Customer } from '../customers/entities/customer.entity';
 import { CartService } from '../cart/cart.service';
 import { SalesService } from '../sales/sales.service';
+import { CloudinaryService } from '../upload/cloudinary.service';
 import { 
   JwtPayload, 
   ValidatedUser, 
@@ -48,6 +49,7 @@ export class AuthService {
     private readonly cartService: CartService,
     @Inject(forwardRef(() => SalesService))
     private readonly salesService: SalesService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<ValidatedUser | null> {
@@ -227,7 +229,7 @@ export class AuthService {
     }
   }
 
-  async registerAdmin(registerAdminDto: RegisterAdminDto, createdBy?: string | null): Promise<LoginResponse> {
+  async registerAdmin(registerAdminDto: RegisterAdminDto, createdBy?: string | null, file?: Express.Multer.File): Promise<LoginResponse> {
     try {
       // Validar clave secreta para admin
       const adminSecretKey = (registerAdminDto as any).adminSecretKey;
@@ -246,12 +248,17 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(registerAdminDto.password, 12);
 
+      let profileImageUrl = registerAdminDto.profileImage;
+      if (file) {
+        profileImageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'users');
+      }
       const user = this.userRepository.create({
         email: registerAdminDto.email,
         password: hashedPassword,
         firstName: registerAdminDto.firstName,
         lastName: registerAdminDto.lastName,
         role: UserRole.ADMIN,
+        profileImageUrl,
       });
 
       const savedUser = await this.userRepository.save(user);
@@ -284,7 +291,7 @@ export class AuthService {
     }
   }
 
-  async registerSeller(registerSellerDto: RegisterSellerDto, createdBy: string): Promise<LoginResponse> {
+  async registerSeller(registerSellerDto: RegisterSellerDto, createdBy: string, file?: Express.Multer.File): Promise<LoginResponse> {
     try {
       const existingUser = await this.userRepository.findOne({
         where: { email: registerSellerDto.email },
@@ -296,12 +303,17 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(registerSellerDto.password, 12);
 
+      let profileImageUrl = registerSellerDto.profileImage;
+      if (file) {
+        profileImageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'users');
+      }
       const user = this.userRepository.create({
         email: registerSellerDto.email,
         password: hashedPassword,
         firstName: registerSellerDto.firstName,
         lastName: registerSellerDto.lastName,
         role: UserRole.SELLER,
+        profileImageUrl,
       });
 
       const savedUser = await this.userRepository.save(user);
@@ -334,7 +346,7 @@ export class AuthService {
     }
   }
 
-  async registerCustomer(registerCustomerDto: RegisterCustomerDto): Promise<LoginResponse> {
+  async registerCustomer(registerCustomerDto: RegisterCustomerDto, file?: Express.Multer.File): Promise<LoginResponse> {
     try {
       const existingUser = await this.userRepository.findOne({
         where: { email: registerCustomerDto.email },
@@ -346,12 +358,17 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(registerCustomerDto.password, 12);
 
+      let profileImageUrl = registerCustomerDto.profileImage;
+      if (file) {
+        profileImageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'users');
+      }
       const user = this.userRepository.create({
         email: registerCustomerDto.email,
         password: hashedPassword,
         firstName: registerCustomerDto.firstName,
         lastName: registerCustomerDto.lastName,
         role: UserRole.CUSTOMER,
+        profileImageUrl,
       });
 
       const savedUser = await this.userRepository.save(user);
@@ -366,6 +383,7 @@ export class AuthService {
         city: registerCustomerDto.city,
         state: registerCustomerDto.state,
         zipCode: registerCustomerDto.zipCode,
+        profileImageUrl,
         user: savedUser,
       });
 
@@ -582,7 +600,7 @@ export class AuthService {
     return user;
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto, adminId: string): Promise<User> {
+  async updateUser(id: string, updateUserDto: UpdateUserDto, adminId: string, file?: Express.Multer.File): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['customer'],
@@ -611,6 +629,12 @@ export class AuthService {
     if (typeof updateUserDto.firstName === 'string') updateFields.firstName = updateUserDto.firstName;
     if (typeof updateUserDto.lastName === 'string') updateFields.lastName = updateUserDto.lastName;
     updateFields.updatedAt = new Date();
+
+    // Si se proporciona un archivo, subirlo y actualizar la imagen de perfil
+    if (file) {
+      const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'users');
+      updateFields.profileImageUrl = imageUrl;
+    }
 
     await this.userRepository.update(id, updateFields);
 

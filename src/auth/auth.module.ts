@@ -10,6 +10,7 @@ import { Customer } from '../customers/entities/customer.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { forwardRef } from '@nestjs/common';
+import { UploadModule } from '../upload/upload.module';
 import { CartModule } from '../cart/cart.module';
 import { SalesModule } from '../sales/sales.module';
 
@@ -29,6 +30,7 @@ import { SalesModule } from '../sales/sales.module';
     }),
     forwardRef(() => CartModule),
     forwardRef(() => SalesModule),
+    UploadModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, LocalStrategy],

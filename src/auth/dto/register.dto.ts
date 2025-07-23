@@ -60,6 +60,11 @@ export class RegisterCustomerDto {
   @IsOptional()
   @IsString()
   zipCode?: string;
+
+  @ApiProperty({ example: 'https://motoshop.com/uploads/profile.jpg', required: false, description: 'URL de la foto de perfil' })
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
 }
 
 export class RegisterAdminDto {
@@ -79,6 +84,11 @@ export class RegisterAdminDto {
   @ApiProperty({ example: 'Principal' })
   @IsString()
   lastName: string;
+
+  @ApiProperty({ example: 'https://motoshop.com/uploads/profile.jpg', required: false, description: 'URL de la foto de perfil' })
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
 
   @ApiProperty({ example: 'MOTORCYCLE_ADMIN_KLEVER_2025', description: 'Clave secreta para crear admin' })
   @IsString()
@@ -102,6 +112,11 @@ export class RegisterSellerDto {
   @ApiProperty({ example: 'González' })
   @IsString()
   lastName: string;
+
+  @ApiProperty({ example: 'https://motoshop.com/uploads/profile.jpg', required: false, description: 'URL de la foto de perfil' })
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
 
   @ApiProperty({ example: '+1234567890' })
   @IsString()

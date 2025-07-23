@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { CloudinaryService } from '../upload/cloudinary.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
@@ -15,11 +16,17 @@ export class CategoriesService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Motorcycle)
     private readonly motorcycleRepository: Repository<Motorcycle>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+  async create(createCategoryDto: CreateCategoryDto, file?: Express.Multer.File): Promise<Category> {
     try {
-      const category = this.categoryRepository.create(createCategoryDto);
+      let imageUrls = createCategoryDto.imageUrls || [];
+      if (file) {
+        const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'categories');
+        imageUrls = [...imageUrls, uploadedUrl];
+      }
+      const category = this.categoryRepository.create({ ...createCategoryDto, imageUrls });
       return await this.categoryRepository.save(category);
     } catch (error) {
       this.logger.error(`Failed to create category: ${getErrorMessage(error)}`);
@@ -75,12 +82,19 @@ export class CategoriesService {
     }
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto, file?: Express.Multer.File): Promise<Category> {
     try {
       const category = await this.findOne(id);
-      
+      let imageUrls = Array.isArray(category.imageUrls) ? [...category.imageUrls] : [];
+      if (Array.isArray(updateCategoryDto.imageUrls)) {
+        imageUrls = updateCategoryDto.imageUrls;
+      }
+      if (file) {
+        const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'categories');
+        imageUrls.push(uploadedUrl);
+      }
       Object.assign(category, updateCategoryDto);
-      
+      category.imageUrls = imageUrls;
       return await this.categoryRepository.save(category);
     } catch (error) {
       this.logger.error(`Failed to update category ${id}: ${getErrorMessage(error)}`);

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Motorcycle, MotorcycleStatus } from './entities/motorcycle.entity';
@@ -6,6 +6,7 @@ import { Category } from '../categories/entities/category.entity';
 import { CreateMotorcycleDto, UpdateMotorcycleDto } from './dto/motorcycle.dto';
 import { getErrorMessage } from '../common/types/error.types';
 import { PriceHistoryService } from '../mongodb/service/price-history.service';
+import { CloudinaryService } from '../upload/cloudinary.service';
 
 @Injectable()
 export class MotorcyclesService {
@@ -17,9 +18,10 @@ export class MotorcyclesService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly priceHistoryService: PriceHistoryService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createMotorcycleDto: CreateMotorcycleDto): Promise<Motorcycle> {
+  async create(createMotorcycleDto: CreateMotorcycleDto, file?: Express.Multer.File): Promise<Motorcycle> {
     try {
       // Verify category exists
       const category = await this.categoryRepository.findOne({
@@ -30,11 +32,16 @@ export class MotorcyclesService {
         throw new NotFoundException(`Category with ID ${createMotorcycleDto.categoryId} not found`);
       }
 
+      let imageUrls = createMotorcycleDto.imageUrls || [];
+      if (file) {
+        const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+        imageUrls = [...imageUrls, uploadedUrl];
+      }
       const motorcycle = this.motorcycleRepository.create({
         ...createMotorcycleDto,
+        imageUrls,
         category,
       });
-
       const savedMotorcycle = await this.motorcycleRepository.save(motorcycle);
       this.logger.log(`Motorcycle created with ID: ${savedMotorcycle.id}`);
       return savedMotorcycle;
@@ -114,7 +121,7 @@ export class MotorcyclesService {
     }
   }
 
-  async update(id: string, updateMotorcycleDto: UpdateMotorcycleDto, userId?: string): Promise<Motorcycle> {
+  async update(id: string, updateMotorcycleDto: UpdateMotorcycleDto, userId?: string, file?: Express.Multer.File): Promise<Motorcycle> {
     try {
       const motorcycle = await this.findOne(id);
 
@@ -151,9 +158,17 @@ export class MotorcyclesService {
         }
       }
 
+      // Si se sube una nueva imagen, agregarla al array
+      if (file) {
+        const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+        if (Array.isArray(motorcycle.imageUrls)) {
+          motorcycle.imageUrls.push(uploadedUrl);
+        } else {
+          motorcycle.imageUrls = [uploadedUrl];
+        }
+      }
       Object.assign(motorcycle, updateMotorcycleDto);
       const updatedMotorcycle = await this.motorcycleRepository.save(motorcycle);
-
       this.logger.log(`Motorcycle updated with ID: ${id}`);
       return updatedMotorcycle;
     } catch (error) {

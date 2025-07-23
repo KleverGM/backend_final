@@ -10,8 +10,11 @@ import {
   HttpStatus,
   Patch,
   Delete,
-  Param
+  Param,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginDto } from './dto/auth.dto';
@@ -74,8 +77,12 @@ export class AuthController {
   @Post('register/customer')
   @ApiOperation({ summary: 'Register a new customer with profile' })
   @ApiResponse({ status: 201, description: 'Customer registered successfully' })
-  async registerCustomer(@Body() registerCustomerDto: RegisterCustomerDto) {
-    return this.authService.registerCustomer(registerCustomerDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async registerCustomer(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() registerCustomerDto: RegisterCustomerDto
+  ) {
+    return this.authService.registerCustomer(registerCustomerDto, file);
   }
 
   @Post('register/admin')
@@ -84,12 +91,14 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Register a new admin (admin only)' })
   @ApiResponse({ status: 201, description: 'Admin registered successfully' })
+  @UseInterceptors(FileInterceptor('file'))
   async registerAdmin(
+    @UploadedFile() file: Express.Multer.File,
     @Body() registerAdminDto: RegisterAdminDto,
     @Request() req: RequestWithUser,
   ) {
     // Permitir creación del primer admin sin autenticación
-    return this.authService.registerAdmin(registerAdminDto, null);
+    return this.authService.registerAdmin(registerAdminDto, null, file);
   }
 
   @Post('register/seller')
@@ -98,11 +107,13 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Register a new seller (admin only)' })
   @ApiResponse({ status: 201, description: 'Seller registered successfully' })
+  @UseInterceptors(FileInterceptor('file'))
   async registerSeller(
+    @UploadedFile() file: Express.Multer.File,
     @Body() registerSellerDto: RegisterSellerDto,
     @Request() req: RequestWithUser,
   ) {
-    return this.authService.registerSeller(registerSellerDto, req.user.id);
+    return this.authService.registerSeller(registerSellerDto, req.user.id, file);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -200,12 +211,14 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Usuario no encontrado' })
   @ApiResponse({ status: 403, description: 'Acceso prohibido' })
   @ApiResponse({ status: 409, description: 'Correo electrónico ya está en uso' })
+  @UseInterceptors(FileInterceptor('file'))
   async updateUser(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateUserDto: UpdateUserDto,
     @Request() req: RequestWithUser,
   ) {
-    const updatedUser = await this.authService.updateUser(id, updateUserDto, req.user.id);
+    const updatedUser = await this.authService.updateUser(id, updateUserDto, req.user.id, file);
     return {
       message: 'Usuario actualizado correctamente',
       user: {

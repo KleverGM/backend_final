@@ -33,13 +33,17 @@ export class CreateCategoryDto {
   isActive?: boolean;
 
   @ApiProperty({
-    example: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport.jpg',
-    description: 'URL de la imagen de la categoría',
+    example: [
+      'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport1.jpg',
+      'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport2.jpg'
+    ],
+    description: 'URLs de las imágenes de la categoría',
     required: false,
+    type: [String],
   })
   @IsOptional()
-  @IsString()
-  imageUrl?: string;
+  @IsString({ each: true })
+  imageUrls?: string[];
 }
 
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
@@ -60,8 +64,16 @@ export class CategoryResponseDto {
   @ApiProperty()
   motorcycleCount?: number;
 
-  @ApiProperty({ example: 'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport.jpg', description: 'URL de la imagen de la categoría', required: false })
-  imageUrl?: string;
+  @ApiProperty({
+    example: [
+      'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport1.jpg',
+      'https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/categorias/sport2.jpg'
+    ],
+    description: 'URLs de las imágenes de la categoría',
+    required: false,
+    type: [String],
+  })
+  imageUrls?: string[];
 
   @ApiProperty()
   createdAt: Date;

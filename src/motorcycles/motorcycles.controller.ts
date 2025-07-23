@@ -60,8 +60,12 @@ export class MotorcyclesController {
   @ApiOperation({ summary: 'Create a new motorcycle (Admin/Seller only)' })
   @ApiResponse({ status: 201, description: 'Motorcycle created successfully' })
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createMotorcycleDto: CreateMotorcycleDto) {
-    const motorcycle = await this.motorcyclesService.create(createMotorcycleDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createMotorcycleDto: CreateMotorcycleDto
+  ) {
+    const motorcycle = await this.motorcyclesService.create(createMotorcycleDto, file);
     return {
       message: 'Motorcycle created successfully',
       data: motorcycle,
@@ -130,12 +134,14 @@ export class MotorcyclesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update motorcycle (Admin/Seller only)' })
   @ApiResponse({ status: 200, description: 'Motorcycle updated successfully' })
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
     @Request() req: RequestWithUser,
   ) {
-    const motorcycle = await this.motorcyclesService.update(id, updateMotorcycleDto, req.user.id);
+    const motorcycle = await this.motorcyclesService.update(id, updateMotorcycleDto, req.user.id, file);
     return {
       message: 'Motorcycle updated successfully',
       data: motorcycle,

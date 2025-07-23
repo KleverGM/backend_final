@@ -32,7 +32,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Subir o actualizar imagen de categoría (Admin)' })
+  @ApiOperation({ summary: 'Subir o agregar imagen a la categoría (Admin)' })
   @ApiResponse({ status: 200, description: 'Imagen de categoría actualizada correctamente' })
   @UseInterceptors(FileInterceptor('file'))
   async uploadCategoryImage(
@@ -44,8 +44,14 @@ export class CategoriesController {
     }
     // Subir imagen a Cloudinary
     const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'categories');
+    // Obtener la categoría actual
+    const categoryActual = await this.categoriesService.findOne(id);
+    // Acumular la nueva imagen en el array
+    const nuevasImagenes = Array.isArray(categoryActual.imageUrls)
+      ? [...categoryActual.imageUrls, imageUrl]
+      : [imageUrl];
     // Actualizar categoría
-    const category = await this.categoriesService.update(id, { imageUrl });
+    const category = await this.categoriesService.update(id, { imageUrls: nuevasImagenes });
     return {
       message: 'Imagen de categoría actualizada correctamente',
       data: category,
@@ -59,8 +65,12 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Create a new category (Admin only)' })
   @ApiResponse({ status: 201, description: 'Category created successfully' })
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createCategoryDto: CreateCategoryDto) {
-    const category = await this.categoriesService.create(createCategoryDto);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createCategoryDto: CreateCategoryDto
+  ) {
+    const category = await this.categoriesService.create(createCategoryDto, file);
     return {
       message: 'Category created successfully',
       data: category,
@@ -106,11 +116,13 @@ export class CategoriesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update category (Admin only)' })
   @ApiResponse({ status: 200, description: 'Category updated successfully' })
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    const category = await this.categoriesService.update(id, updateCategoryDto);
+    const category = await this.categoriesService.update(id, updateCategoryDto, file);
     return {
       message: 'Category updated successfully',
       data: category,

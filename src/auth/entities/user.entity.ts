@@ -42,6 +42,10 @@ export class User {
   })
   role: UserRole;
 
+
+  @Column({ nullable: true })
+  profileImageUrl: string;
+
   @Column({ default: true })
   isActive: boolean;
 
