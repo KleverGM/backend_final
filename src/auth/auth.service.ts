@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException, Logger, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Logger, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { CreateUserDto, LoginDto } from './dto/auth.dto';
 import { RegisterCustomerDto, RegisterAdminDto, RegisterSellerDto, LoginCustomerDto, LoginAdminDto, LoginSellerDto, RefreshTokenDto } from './dto/register.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Customer } from '../customers/entities/customer.entity';
+import { CartService } from '../cart/cart.service';
 import { 
   JwtPayload, 
   ValidatedUser, 
@@ -29,6 +30,8 @@ export class AuthService {
     private readonly customerRepository: Repository<Customer>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => CartService))
+    private readonly cartService: CartService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<ValidatedUser | null> {
@@ -610,6 +613,7 @@ export class AuthService {
   async removeUser(id: string, adminId: string): Promise<void> {
     const user = await this.userRepository.findOne({
       where: { id },
+      relations: ['customer'],
     });
 
     if (!user) {
@@ -619,6 +623,11 @@ export class AuthService {
     // No permitir que un admin se elimine a sí mismo
     if (id === adminId) {
       throw new ForbiddenException('Cannot delete your own admin account');
+    }
+
+    // Si el usuario tiene un customer relacionado, eliminar sus cart_items primero
+    if (user.customer) {
+      await this.cartService.clearCart(user.customer.id);
     }
 
     await this.userRepository.remove(user);
