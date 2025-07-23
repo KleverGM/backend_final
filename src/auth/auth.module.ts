@@ -11,6 +11,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { forwardRef } from '@nestjs/common';
 import { CartModule } from '../cart/cart.module';
+import { SalesModule } from '../sales/sales.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CartModule } from '../cart/cart.module';
       inject: [ConfigService],
     }),
     forwardRef(() => CartModule),
+    forwardRef(() => SalesModule),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, LocalStrategy],
