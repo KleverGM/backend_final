@@ -252,12 +252,20 @@ export class AuthService {
       if (file) {
         profileImageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'users');
       }
+
+      // Permitir que el rol venga del frontend solo si el usuario autenticado es admin
+      let roleToAssign = UserRole.ADMIN;
+      if ((registerAdminDto as any).role && createdBy) {
+        // createdBy solo se pasa si el usuario autenticado es admin
+        roleToAssign = (registerAdminDto as any).role;
+      }
+
       const user = this.userRepository.create({
         email: registerAdminDto.email,
         password: hashedPassword,
         firstName: registerAdminDto.firstName,
         lastName: registerAdminDto.lastName,
-        role: UserRole.ADMIN,
+        role: roleToAssign,
         profileImageUrl,
       });
 
@@ -307,12 +315,19 @@ export class AuthService {
       if (file) {
         profileImageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'users');
       }
+
+      // Permitir que el rol venga del frontend solo si el usuario autenticado es admin
+      let roleToAssign = UserRole.SELLER;
+      if ((registerSellerDto as any).role && createdBy) {
+        roleToAssign = (registerSellerDto as any).role;
+      }
+
       const user = this.userRepository.create({
         email: registerSellerDto.email,
         password: hashedPassword,
         firstName: registerSellerDto.firstName,
         lastName: registerSellerDto.lastName,
-        role: UserRole.SELLER,
+        role: roleToAssign,
         profileImageUrl,
       });
 

@@ -144,6 +144,8 @@ export class MotorcyclesController {
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
     @Request() req: RequestWithUser,
   ) {
+    // Log para depuración: mostrar el valor recibido de categoryId
+    console.log('PATCH /motorcycles/:id categoryId recibido:', updateMotorcycleDto.categoryId);
     const motorcycle = await this.motorcyclesService.update(id, updateMotorcycleDto, req.user.id, file);
     return {
       message: 'Motorcycle updated successfully',
