@@ -146,6 +146,13 @@ export class MotorcyclesController {
   ) {
     // Log body crudo recibido
     console.log('PATCH /motorcycles/:id BODY CRUDO:', req.body);
+    if (req.body) {
+      console.log('PATCH /motorcycles/:id features:', req.body.features);
+      console.log('PATCH /motorcycles/:id imageUrls:', req.body.imageUrls);
+    } else {
+      console.log('PATCH /motorcycles/:id features: req.body es undefined');
+      console.log('PATCH /motorcycles/:id imageUrls: req.body es undefined');
+    }
     // Transformar manualmente los campos que lo requieran
     const transformedDto: any = { ...req.body };
     // Números
