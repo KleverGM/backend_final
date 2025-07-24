@@ -1,3 +1,10 @@
+// Utilidad para limpiar números: solo dígitos
+export function cleanNumber(val: any) {
+  if (val === undefined || val === null) return val;
+  const digits = String(val).replace(/\D/g, '');
+  return digits === '' ? undefined : Number(digits);
+}
+
 import {
   IsString,
   IsNumber,
@@ -16,30 +23,42 @@ export class CreateInventoryDto {
 
   @IsNumber()
   @Min(0)
-  quantity: number;
+  set quantity(val: any) { this._quantity = cleanNumber(val); }
+  get quantity(): number { return this._quantity; }
+  private _quantity: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  reservedQuantity?: number;
+  set reservedQuantity(val: any) { this._reservedQuantity = cleanNumber(val); }
+  get reservedQuantity(): number | undefined { return this._reservedQuantity; }
+  private _reservedQuantity?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  minStockLevel?: number;
+  set minStockLevel(val: any) { this._minStockLevel = cleanNumber(val); }
+  get minStockLevel(): number | undefined { return this._minStockLevel; }
+  private _minStockLevel?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  maxStockLevel?: number;
+  set maxStockLevel(val: any) { this._maxStockLevel = cleanNumber(val); }
+  get maxStockLevel(): number | undefined { return this._maxStockLevel; }
+  private _maxStockLevel?: number;
 
   @IsNumber()
   @Min(0)
-  costPrice: number;
+  set costPrice(val: any) { this._costPrice = cleanNumber(val); }
+  get costPrice(): number { return this._costPrice; }
+  private _costPrice: number;
 
   @IsNumber()
   @Min(0)
-  sellingPrice: number;
+  set sellingPrice(val: any) { this._sellingPrice = cleanNumber(val); }
+  get sellingPrice(): number { return this._sellingPrice; }
+  private _sellingPrice: number;
 
   @IsOptional()
   @IsEnum(InventoryStatus)
@@ -77,32 +96,44 @@ export class UpdateInventoryDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  quantity?: number;
+  set quantity(val: any) { this._quantity = cleanNumber(val); }
+  get quantity(): number | undefined { return this._quantity; }
+  private _quantity?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  reservedQuantity?: number;
+  set reservedQuantity(val: any) { this._reservedQuantity = cleanNumber(val); }
+  get reservedQuantity(): number | undefined { return this._reservedQuantity; }
+  private _reservedQuantity?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  minStockLevel?: number;
+  set minStockLevel(val: any) { this._minStockLevel = cleanNumber(val); }
+  get minStockLevel(): number | undefined { return this._minStockLevel; }
+  private _minStockLevel?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  maxStockLevel?: number;
+  set maxStockLevel(val: any) { this._maxStockLevel = cleanNumber(val); }
+  get maxStockLevel(): number | undefined { return this._maxStockLevel; }
+  private _maxStockLevel?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  costPrice?: number;
+  set costPrice(val: any) { this._costPrice = cleanNumber(val); }
+  get costPrice(): number | undefined { return this._costPrice; }
+  private _costPrice?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  sellingPrice?: number;
+  set sellingPrice(val: any) { this._sellingPrice = cleanNumber(val); }
+  get sellingPrice(): number | undefined { return this._sellingPrice; }
+  private _sellingPrice?: number;
 
   @IsOptional()
   @IsEnum(InventoryStatus)
@@ -131,26 +162,4 @@ export class UpdateInventoryDto {
   @IsOptional()
   @IsUUID()
   motorcycleId?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
-}
-
-export class RestockDto {
-  @IsNumber()
-  @Min(1)
-  quantity: number;
-
-  @IsNumber()
-  @Min(0)
-  costPrice: number;
-
-  @IsOptional()
-  @IsString()
-  supplier?: string;
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
 }

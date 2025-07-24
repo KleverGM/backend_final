@@ -50,21 +50,26 @@ export class CartService {
       // Obtener el precio real de la motocicleta
       const motorcycle = await this.motorcyclesService.findOne(addToCartDto.motorcycleId);
       let unitPrice: number;
+      const cleanNumber = (val: any) => {
+        if (val === undefined || val === null) return val;
+        const digits = String(val).replace(/\D/g, '');
+        return digits === '' ? undefined : Number(digits);
+      };
       if (typeof motorcycle.price === 'string') {
-        unitPrice = parseFloat(motorcycle.price);
+        unitPrice = cleanNumber(motorcycle.price);
       } else {
-        unitPrice = motorcycle.price;
+        unitPrice = cleanNumber(motorcycle.price);
       }
-      if (!motorcycle || motorcycle.price === null || motorcycle.price === undefined || isNaN(unitPrice)) {
+      if (!motorcycle || unitPrice === null || unitPrice === undefined || isNaN(unitPrice)) {
         throw new NotFoundException('Motocicleta no encontrada o precio inválido');
       }
 
       const cartItem = this.cartRepository.create({
         customerId,
         motorcycleId: addToCartDto.motorcycleId,
-        quantity: addToCartDto.quantity,
+        quantity: cleanNumber(addToCartDto.quantity),
         unitPrice: unitPrice,
-        totalPrice: unitPrice * addToCartDto.quantity,
+        totalPrice: unitPrice * cleanNumber(addToCartDto.quantity),
         notes: addToCartDto.notes,
       });
 
@@ -130,16 +135,21 @@ export class CartService {
         // Obtener el precio actualizado de la motocicleta
         const motorcycle = await this.motorcyclesService.findOne(cartItem.motorcycleId);
         let unitPrice: number;
-        if (typeof motorcycle.price === 'string') {
-          unitPrice = parseFloat(motorcycle.price);
-        } else {
-          unitPrice = motorcycle.price;
-        }
+      const cleanNumber = (val: any) => {
+        if (val === undefined || val === null) return val;
+        const digits = String(val).replace(/\D/g, '');
+        return digits === '' ? undefined : Number(digits);
+      };
+      if (typeof motorcycle.price === 'string') {
+        unitPrice = cleanNumber(motorcycle.price);
+      } else {
+        unitPrice = cleanNumber(motorcycle.price);
+      }
         if (!motorcycle || motorcycle.price === null || motorcycle.price === undefined || isNaN(unitPrice)) {
           throw new NotFoundException('Motocicleta no encontrada o precio inválido');
         }
         cartItem.unitPrice = unitPrice;
-        cartItem.quantity = updateCartItemDto.quantity;
+        cartItem.quantity = cleanNumber(updateCartItemDto.quantity);
         cartItem.totalPrice = unitPrice * cartItem.quantity;
       }
       if (updateCartItemDto.notes !== undefined) {
@@ -191,7 +201,12 @@ export class CartService {
         .andWhere('cart.isActive = :isActive', { isActive: true })
         .getRawOne();
 
-      return parseInt(result?.total) || 0;
+      const cleanNumber = (val: any) => {
+        if (val === undefined || val === null) return 0;
+        const digits = String(val).replace(/\D/g, '');
+        return digits === '' ? 0 : Number(digits);
+      };
+      return cleanNumber(result?.total) || 0;
     } catch (error) {
       this.logger.error(`Error getting cart count: ${error.message}`);
       return 0;

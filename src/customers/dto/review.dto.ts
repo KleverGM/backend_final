@@ -1,3 +1,10 @@
+// Utilidad para limpiar números: solo dígitos
+export function cleanNumber(val: any) {
+  if (val === undefined || val === null) return val;
+  const digits = String(val).replace(/\D/g, '');
+  return digits === '' ? undefined : Number(digits);
+}
+
 import { IsUUID, IsNumber, IsString, IsOptional, Min, Max, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,7 +25,9 @@ export class CreateReviewDto {
   @IsNumber()
   @Min(1)
   @Max(5)
-  rating: number;
+  set rating(val: any) { this._rating = cleanNumber(val); }
+  get rating(): number { return this._rating; }
+  private _rating: number;
 
   @ApiProperty({
     description: 'Comentario de la reseña',
@@ -40,7 +49,9 @@ export class UpdateReviewDto {
   @Min(1)
   @Max(5)
   @IsOptional()
-  rating?: number;
+  set rating(val: any) { this._rating = cleanNumber(val); }
+  get rating(): number | undefined { return this._rating; }
+  private _rating?: number;
 
   @ApiProperty({
     description: 'Comentario de la reseña',
@@ -69,14 +80,5 @@ export class ReviewResponseDto {
   comment: string;
 
   @ApiProperty()
-  createdAt: Date;
-  
-  @ApiProperty()
-  updatedAt: Date;
-  
-  @ApiProperty()
-  customer?: any;
-  
-  @ApiProperty()
-  motorcycle?: any;
+  createdAt: string;
 }

@@ -67,8 +67,8 @@ export class ActivityLogController {
       resource,
       fromDate,
       toDate,
-      limit: limit ? parseInt(limit.toString(), 10) : 50,
-      offset: offset ? parseInt(offset.toString(), 10) : 0,
+      limit: limit ? Number(String(limit).replace(/\D/g, '')) : 50,
+      offset: offset ? Number(String(offset).replace(/\D/g, '')) : 0,
     };
 
     const result = await this.activityLogService.getActivityLogs(filters);
@@ -91,8 +91,8 @@ export class ActivityLogController {
       userId,
       fromDate,
       toDate,
-      limit: limit ? parseInt(limit.toString(), 10) : 50,
-      offset: offset ? parseInt(offset.toString(), 10) : 0,
+      limit: limit ? Number(String(limit).replace(/\D/g, '')) : 50,
+      offset: offset ? Number(String(offset).replace(/\D/g, '')) : 0,
     };
 
     const result = await this.activityLogService.getActivityLogs(filters);
@@ -114,8 +114,8 @@ export class ActivityLogController {
       userId: req.user.id,
       fromDate,
       toDate,
-      limit: limit ? parseInt(limit.toString(), 10) : 50,
-      offset: offset ? parseInt(offset.toString(), 10) : 0,
+      limit: limit ? Number(String(limit).replace(/\D/g, '')) : 50,
+      offset: offset ? Number(String(offset).replace(/\D/g, '')) : 0,
     };
 
     const result = await this.activityLogService.getActivityLogs(filters);
@@ -138,8 +138,8 @@ export class ActivityLogController {
       action,
       fromDate,
       toDate,
-      limit: limit ? parseInt(limit.toString(), 10) : 50,
-      offset: offset ? parseInt(offset.toString(), 10) : 0,
+      limit: limit ? Number(String(limit).replace(/\D/g, '')) : 50,
+      offset: offset ? Number(String(offset).replace(/\D/g, '')) : 0,
     };
 
     const result = await this.activityLogService.getActivityLogs(filters);
@@ -164,8 +164,8 @@ export class ActivityLogController {
       resourceId,
       fromDate,
       toDate,
-      limit: limit ? parseInt(limit.toString(), 10) : 50,
-      offset: offset ? parseInt(offset.toString(), 10) : 0,
+      limit: limit ? Number(String(limit).replace(/\D/g, '')) : 50,
+      offset: offset ? Number(String(offset).replace(/\D/g, '')) : 0,
     };
 
     const result = await this.activityLogService.getActivityLogs(filters);

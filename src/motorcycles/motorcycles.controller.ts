@@ -154,12 +154,18 @@ export class MotorcyclesController {
     console.log('PATCH /motorcycles/:id req.files:', files);
     // Transformar manualmente los campos que lo requieran
     const transformedDto: any = { ...req.body };
-    // Números (aceptar 0 y string '0')
-    if (transformedDto.year !== undefined) transformedDto.year = Number(transformedDto.year);
-    if (transformedDto.price !== undefined) transformedDto.price = Number(transformedDto.price);
-    if (transformedDto.displacement !== undefined) transformedDto.displacement = Number(transformedDto.displacement);
-    if (transformedDto.power !== undefined) transformedDto.power = Number(transformedDto.power);
-    if (transformedDto.mileage !== undefined) transformedDto.mileage = Number(transformedDto.mileage);
+    // Números: limpiar para aceptar solo dígitos (sin puntos ni comas)
+    const cleanNumber = (val: any) => {
+      if (val === undefined || val === null) return val;
+      // Elimina todo lo que no sea dígito
+      const digits = String(val).replace(/\D/g, '');
+      return digits === '' ? undefined : Number(digits);
+    };
+    if (transformedDto.year !== undefined) transformedDto.year = cleanNumber(transformedDto.year);
+    if (transformedDto.price !== undefined) transformedDto.price = cleanNumber(transformedDto.price);
+    if (transformedDto.displacement !== undefined) transformedDto.displacement = cleanNumber(transformedDto.displacement);
+    if (transformedDto.power !== undefined) transformedDto.power = cleanNumber(transformedDto.power);
+    if (transformedDto.mileage !== undefined) transformedDto.mileage = cleanNumber(transformedDto.mileage);
     // Booleanos
     if (transformedDto.isActive !== undefined) transformedDto.isActive = transformedDto.isActive === 'true' || transformedDto.isActive === true;
     // Arrays (features, imageUrls)

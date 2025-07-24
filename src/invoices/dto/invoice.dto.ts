@@ -1,3 +1,10 @@
+// Utilidad para limpiar números: solo dígitos
+export function cleanNumber(val: any) {
+  if (val === undefined || val === null) return val;
+  const digits = String(val).replace(/\D/g, '');
+  return digits === '' ? undefined : Number(digits);
+}
+
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber, IsOptional, IsDateString, IsArray, IsEnum, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -17,17 +24,23 @@ export class InvoiceItemDto {
   @ApiProperty({ description: 'Quantity of items', example: 2 })
   @IsNotEmpty()
   @IsNumber()
-  quantity: number;
+  set quantity(val: any) { this._quantity = cleanNumber(val); }
+  get quantity(): number { return this._quantity; }
+  private _quantity: number;
 
   @ApiProperty({ description: 'Price per unit', example: 199.99 })
   @IsNotEmpty()
   @IsNumber()
-  unitPrice: number;
+  set unitPrice(val: any) { this._unitPrice = cleanNumber(val); }
+  get unitPrice(): number { return this._unitPrice; }
+  private _unitPrice: number;
 
   @ApiProperty({ description: 'Total price for this item', example: 399.98 })
   @IsNotEmpty()
   @IsNumber()
-  totalPrice: number;
+  set totalPrice(val: any) { this._totalPrice = cleanNumber(val); }
+  get totalPrice(): number { return this._totalPrice; }
+  private _totalPrice: number;
 }
 
 export class CreateInvoiceDto {
@@ -59,22 +72,28 @@ export class CreateInvoiceDto {
   })
   @IsOptional()
   @IsEnum(InvoiceStatus)
-  status?: InvoiceStatus = InvoiceStatus.DRAFT;
+  status?: InvoiceStatus;
 
   @ApiProperty({ description: 'Subtotal amount before taxes', example: 500 })
   @IsNotEmpty()
   @IsNumber()
-  subtotal: number;
+  set subtotal(val: any) { this._subtotal = cleanNumber(val); }
+  get subtotal(): number { return this._subtotal; }
+  private _subtotal: number;
 
   @ApiProperty({ description: 'Tax amount', example: 50 })
   @IsNotEmpty()
   @IsNumber()
-  tax: number;
+  set tax(val: any) { this._tax = cleanNumber(val); }
+  get tax(): number { return this._tax; }
+  private _tax: number;
 
   @ApiProperty({ description: 'Total amount including taxes', example: 550 })
   @IsNotEmpty()
   @IsNumber()
-  total: number;
+  set total(val: any) { this._total = cleanNumber(val); }
+  get total(): number { return this._total; }
+  private _total: number;
 
   @ApiProperty({
     description: 'Array of invoice items',
@@ -124,17 +143,23 @@ export class UpdateInvoiceDto {
   @ApiProperty({ description: 'Subtotal amount before taxes', example: 500 })
   @IsOptional()
   @IsNumber()
-  subtotal?: number;
+  set subtotal(val: any) { this._subtotal = cleanNumber(val); }
+  get subtotal(): number | undefined { return this._subtotal; }
+  private _subtotal?: number;
 
   @ApiProperty({ description: 'Tax amount', example: 50 })
   @IsOptional()
   @IsNumber()
-  tax?: number;
+  set tax(val: any) { this._tax = cleanNumber(val); }
+  get tax(): number | undefined { return this._tax; }
+  private _tax?: number;
 
   @ApiProperty({ description: 'Total amount including taxes', example: 550 })
   @IsOptional()
   @IsNumber()
-  total?: number;
+  set total(val: any) { this._total = cleanNumber(val); }
+  get total(): number | undefined { return this._total; }
+  private _total?: number;
 
   @ApiProperty({
     description: 'Array of invoice items',

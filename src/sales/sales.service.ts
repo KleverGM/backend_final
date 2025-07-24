@@ -379,7 +379,8 @@ export class SalesService {
 
     let sequence = 1;
     if (lastSale) {
-      const lastSequence = parseInt(lastSale.saleNumber.split('-')[1].slice(6));
+      const digits = String(lastSale.saleNumber.split('-')[1].slice(6)).replace(/\D/g, '');
+      const lastSequence = digits === '' ? 0 : Number(digits);
       sequence = lastSequence + 1;
     }
 
