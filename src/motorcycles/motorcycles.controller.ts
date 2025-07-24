@@ -144,11 +144,31 @@ export class MotorcyclesController {
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
     @Request() req: RequestWithUser,
   ) {
-    // Log para depuración: mostrar el body y archivo recibido
-    console.log('PATCH /motorcycles/:id BODY recibido:', updateMotorcycleDto);
-    console.log('PATCH /motorcycles/:id categoryId recibido:', updateMotorcycleDto.categoryId);
+    // Log body crudo recibido
+    console.log('PATCH /motorcycles/:id BODY CRUDO:', req.body);
+    // Transformar manualmente los campos que lo requieran
+    const transformedDto: any = { ...req.body };
+    // Números
+    if (transformedDto.year) transformedDto.year = Number(transformedDto.year);
+    if (transformedDto.price) transformedDto.price = Number(transformedDto.price);
+    if (transformedDto.displacement) transformedDto.displacement = Number(transformedDto.displacement);
+    if (transformedDto.power) transformedDto.power = Number(transformedDto.power);
+    if (transformedDto.mileage) transformedDto.mileage = Number(transformedDto.mileage);
+    // Booleanos
+    if (transformedDto.isActive !== undefined) transformedDto.isActive = transformedDto.isActive === 'true' || transformedDto.isActive === true;
+    // Arrays (features, imageUrls)
+    if (typeof transformedDto.features === 'string') {
+      try { transformedDto.features = JSON.parse(transformedDto.features); } catch { transformedDto.features = [transformedDto.features]; }
+    }
+    if (typeof transformedDto.imageUrls === 'string') {
+      try { transformedDto.imageUrls = JSON.parse(transformedDto.imageUrls); } catch { transformedDto.imageUrls = [transformedDto.imageUrls]; }
+    }
+    // Enums: fuelType, transmission, status (se quedan como string, el DTO los valida)
+    // UUID: categoryId (se queda como string)
+    // Log body transformado
+    console.log('PATCH /motorcycles/:id BODY TRANSFORMADO:', transformedDto);
     console.log('PATCH /motorcycles/:id FILE recibido:', file);
-    const motorcycle = await this.motorcyclesService.update(id, updateMotorcycleDto, req.user.id, file);
+    const motorcycle = await this.motorcyclesService.update(id, transformedDto, req.user.id, file);
     return {
       message: 'Motorcycle updated successfully',
       data: motorcycle,
