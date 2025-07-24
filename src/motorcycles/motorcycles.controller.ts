@@ -154,12 +154,12 @@ export class MotorcyclesController {
     console.log('PATCH /motorcycles/:id req.files:', files);
     // Transformar manualmente los campos que lo requieran
     const transformedDto: any = { ...req.body };
-    // Números
-    if (transformedDto.year) transformedDto.year = Number(transformedDto.year);
-    if (transformedDto.price) transformedDto.price = Number(transformedDto.price);
-    if (transformedDto.displacement) transformedDto.displacement = Number(transformedDto.displacement);
-    if (transformedDto.power) transformedDto.power = Number(transformedDto.power);
-    if (transformedDto.mileage) transformedDto.mileage = Number(transformedDto.mileage);
+    // Números (aceptar 0 y string '0')
+    if (transformedDto.year !== undefined) transformedDto.year = Number(transformedDto.year);
+    if (transformedDto.price !== undefined) transformedDto.price = Number(transformedDto.price);
+    if (transformedDto.displacement !== undefined) transformedDto.displacement = Number(transformedDto.displacement);
+    if (transformedDto.power !== undefined) transformedDto.power = Number(transformedDto.power);
+    if (transformedDto.mileage !== undefined) transformedDto.mileage = Number(transformedDto.mileage);
     // Booleanos
     if (transformedDto.isActive !== undefined) transformedDto.isActive = transformedDto.isActive === 'true' || transformedDto.isActive === true;
     // Arrays (features, imageUrls)
