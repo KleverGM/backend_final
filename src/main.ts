@@ -12,6 +12,18 @@ async function bootstrap() {
   // Log global para todas las peticiones entrantes
   app.use((req, res, next) => {
     console.log(`[GLOBAL LOG] ${req.method} ${req.originalUrl}`);
+    // Log especial para PATCH a /api/motorcycles/:id
+    if (req.method === 'PATCH' && req.originalUrl.startsWith('/api/motorcycles/')) {
+      // Si el body ya está parseado (por ejemplo, por multer), lo mostramos
+      console.log('[GLOBAL PATCH BODY]', req.body);
+      // Si hay archivos, también los mostramos
+      if (req.file) {
+        console.log('[GLOBAL PATCH FILE]', req.file);
+      }
+      if (req.files) {
+        console.log('[GLOBAL PATCH FILES]', req.files);
+      }
+    }
     next();
   });
   const configService = app.get(ConfigService);
