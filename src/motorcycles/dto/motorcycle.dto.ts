@@ -1,87 +1,7 @@
-import {
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsOptional,
-  IsArray,
-  IsBoolean,
-  IsUUID,
-  Min,
-  Max,
-  IsUrl,
-} from 'class-validator';
-import {
-  MotorcycleStatus,
-  FuelType,
-  TransmissionType,
-} from '../entities/motorcycle.entity';
-
-export class CreateMotorcycleDto {
-  @IsString()
-  brand: string;
-
-  @IsString()
-  model: string;
-
-  @IsNumber()
-  @Min(1900)
-  @Max(new Date().getFullYear() + 1)
-  year: number;
-
-  @IsNumber()
-  @Min(0)
-  price: number;
-
-  @IsOptional()
-  @IsString()
-  vin?: string;
-
-  @IsString()
-  engine: string;
-
-  @IsNumber()
-  @Min(50)
-  displacement: number;
-
-  @IsNumber()
-  @Min(0)
-  power: number;
-
-  @IsEnum(FuelType)
-  fuelType: FuelType;
-
-  @IsEnum(TransmissionType)
-  transmission: TransmissionType;
-
-  @IsString()
-  color: string;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  mileage?: number;
-
-  @IsOptional()
-  @IsEnum(MotorcycleStatus)
-  status?: MotorcycleStatus;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  features?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsUrl({}, { each: true })
-  imageUrls?: string[];
-
-  @IsUUID()
-  categoryId: string;
-}
+import { IsOptional, IsString, IsNumber, Min, Max, IsEnum, IsArray, IsUrl, IsUUID, IsBoolean } from 'class-validator';
+import { Type } from 'class-transformer';
+import { FuelType, TransmissionType, MotorcycleStatus } from '../entities/motorcycle.entity';
+import { PickType } from '@nestjs/mapped-types';
 
 export class UpdateMotorcycleDto {
   @IsOptional()
@@ -96,11 +16,13 @@ export class UpdateMotorcycleDto {
   @IsNumber()
   @Min(1900)
   @Max(new Date().getFullYear() + 1)
+  @Type(() => Number)
   year?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   price?: number;
 
   @IsOptional()
@@ -114,11 +36,13 @@ export class UpdateMotorcycleDto {
   @IsOptional()
   @IsNumber()
   @Min(50)
+  @Type(() => Number)
   displacement?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   power?: number;
 
   @IsOptional()
@@ -136,6 +60,7 @@ export class UpdateMotorcycleDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Type(() => Number)
   mileage?: number;
 
   @IsOptional()
@@ -172,3 +97,18 @@ export class UpdateMotorcycleDto {
   @IsString()
   priceChangeNotes?: string;
 }
+
+export class CreateMotorcycleDto extends PickType(UpdateMotorcycleDto, [
+  'brand',
+  'model',
+  'year',
+  'price',
+  'engine',
+  'displacement',
+  'power',
+  'fuelType',
+  'transmission',
+  'color',
+  'mileage',
+  'categoryId',
+] as const) {}
