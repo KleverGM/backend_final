@@ -15,7 +15,7 @@ import {
   Request,
   UseInterceptors
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
 import { UploadedFiles } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MotorcyclesService } from './motorcycles.service';
@@ -42,7 +42,7 @@ export class MotorcyclesController {
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SELLER)
-  @UseInterceptors(FilesInterceptor('file'))
+  @UseInterceptors(AnyFilesInterceptor())
   async uploadMotorcycleImage(
     @UploadedFiles() files: Express.Multer.File[],
   ) {
