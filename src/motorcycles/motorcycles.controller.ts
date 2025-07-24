@@ -142,7 +142,7 @@ export class MotorcyclesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update motorcycle (Admin/Seller only)' })
   @ApiResponse({ status: 200, description: 'Motorcycle updated successfully' })
-  @UseInterceptors(FilesInterceptor('file'))
+  @UseInterceptors(AnyFilesInterceptor())
   async update(
     @Param('id') id: string,
     @UploadedFiles() files: Express.Multer.File[],
