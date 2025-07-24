@@ -20,4 +20,13 @@ export class InventoryAnalyticsService {
       throw error;
     }
   }
+
+  async findAll(): Promise<any[]> {
+    try {
+      return await this.inventoryAnalyticsModel.find().exec();
+    } catch (error) {
+      this.logger.error('Error fetching inventory analytics', error);
+      throw error;
+    }
+  }
 }

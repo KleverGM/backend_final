@@ -244,13 +244,13 @@ export class MotorcyclesService {
 
   async remove(id: string): Promise<void> {
     try {
-      const motorcycle = await this.findOne(id);
-      motorcycle.isActive = false;
-      await this.motorcycleRepository.save(motorcycle);
-
-      this.logger.log(`Motorcycle soft deleted with ID: ${id}`);
+      const result = await this.motorcycleRepository.delete(id);
+      if (result.affected === 0) {
+        throw new Error('Motorcycle not found');
+      }
+      this.logger.log(`Motorcycle physically deleted with ID: ${id}`);
     } catch (error) {
-      this.logger.error(`Failed to delete motorcycle ${id}: ${getErrorMessage(error)}`);
+      this.logger.error(`Failed to physically delete motorcycle ${id}: ${getErrorMessage(error)}`);
       throw error;
     }
   }

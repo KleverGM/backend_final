@@ -10,11 +10,19 @@ import { UserRole } from '../../auth/entities/user.entity';
 export class InventoryAnalyticsController {
   constructor(private readonly inventoryAnalyticsService: InventoryAnalyticsService) {}
 
+
   @Post()
   @Roles(UserRole.ADMIN)
   async create(@Body() dto: any) {
     const created = await this.inventoryAnalyticsService.create(dto);
     return { message: 'Inventory analytics created', data: created };
+  }
+
+  @Get()
+  @Roles(UserRole.ADMIN)
+  async findAll() {
+    const data = await this.inventoryAnalyticsService.findAll();
+    return { message: 'Inventory analytics list', data };
   }
 
   @Get(':id')
