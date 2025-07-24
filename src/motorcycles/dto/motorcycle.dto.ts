@@ -104,11 +104,15 @@ export class CreateMotorcycleDto extends PickType(UpdateMotorcycleDto, [
   'year',
   'price',
   'engine',
-  'displacement',
-  'power',
-  'fuelType',
-  'transmission',
-  'color',
-  'mileage',
   'categoryId',
-] as const) {}
+] as const) {
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  features?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsUrl({}, { each: true })
+  imageUrls?: string[];
+}
