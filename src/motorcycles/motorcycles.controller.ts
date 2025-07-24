@@ -37,7 +37,7 @@ export class MotorcyclesController {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
   /**
-   * Subir imagen de moto a Cloudinary y devolver la URL
+   * Subir imagen de moto a Cloudinary 
    */
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
