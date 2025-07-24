@@ -32,17 +32,19 @@ export class InventoryAnalyticsController {
     return { message: 'Inventory analytics found', id };
   }
 
+
   @Patch(':id')
   @Roles(UserRole.ADMIN)
   async update(@Param('id') id: string, @Body() dto: any) {
-    // Implementar lógica de actualización
-    return { message: 'Inventory analytics updated', id, data: dto };
+    const updated = await this.inventoryAnalyticsService.update(id, dto);
+    return { message: 'Inventory analytics updated', data: updated };
   }
+
 
   @Delete(':id')
   @Roles(UserRole.ADMIN)
   async remove(@Param('id') id: string) {
-    // Implementar lógica de eliminación
+    await this.inventoryAnalyticsService.remove(id);
     return { message: 'Inventory analytics deleted', id };
   }
 

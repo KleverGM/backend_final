@@ -29,4 +29,22 @@ export class InventoryAnalyticsService {
       throw error;
     }
   }
+
+  async update(id: string, data: any): Promise<any> {
+    try {
+      return await this.inventoryAnalyticsModel.findByIdAndUpdate(id, data, { new: true }).exec();
+    } catch (error) {
+      this.logger.error('Error updating inventory analytics', error);
+      throw error;
+    }
+  }
+
+  async remove(id: string): Promise<void> {
+    try {
+      await this.inventoryAnalyticsModel.findByIdAndDelete(id).exec();
+    } catch (error) {
+      this.logger.error('Error deleting inventory analytics', error);
+      throw error;
+    }
+  }
 }
