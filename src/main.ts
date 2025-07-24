@@ -9,8 +9,19 @@ import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Log global para todas las peticiones entrantes
+  app.use((req, res, next) => {
+    console.log(`[GLOBAL LOG] ${req.method} ${req.originalUrl}`);
+    next();
+  });
   const configService = app.get(ConfigService);
-  
+
+  // Log global para todas las peticiones entrantes
+  app.use((req, res, next) => {
+    console.log(`[GLOBAL LOG] ${req.method} ${req.originalUrl}`);
+    next();
+  });
+
   // Global validation pipe
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -31,7 +42,7 @@ async function bootstrap() {
   // Serve static files
   const uploadPath = configService.get('uploadPath') || './public/uploads';
   const absoluteUploadPath = join(__dirname, '..', 'public', 'uploads');
-  
+
   // Ensure upload directories exist
   const fs = require('fs');
   const uploadDirs = [
