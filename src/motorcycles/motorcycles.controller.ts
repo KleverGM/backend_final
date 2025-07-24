@@ -13,9 +13,10 @@ import {
   HttpStatus,
   Put,
   Request,
-  UseInterceptors,
-  UploadedFile
+  UseInterceptors
 } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { UploadedFiles } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MotorcyclesService } from './motorcycles.service';
@@ -23,6 +24,7 @@ import { CreateMotorcycleDto, UpdateMotorcycleDto } from './dto/motorcycle.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+  UploadedFiles
 import { UserRole } from '../auth/entities/user.entity';
 import { MotorcycleStatus } from './entities/motorcycle.entity';
 import { RequestWithUser } from '../common/interfaces/auth.interfaces';
@@ -42,14 +44,14 @@ export class MotorcyclesController {
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SELLER)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(AnyFilesInterceptor())
   async uploadMotorcycleImage(
-    @UploadedFile() file: any,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    if (!file) {
+    if (!files || files.length === 0) {
       return { message: 'No se proporcionó archivo', data: null };
     }
-    const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+    const imageUrl = await this.cloudinaryService.uploadImage(files[0].buffer, 'motorcycles');
     return {
       message: 'Imagen de moto subida correctamente',
       url: imageUrl,
@@ -65,9 +67,10 @@ export class MotorcyclesController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file'))
   async create(
-    @UploadedFile() file: any,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() createMotorcycleDto: CreateMotorcycleDto
   ) {
+    const file = files && files.length > 0 ? files[0] : undefined;
     const motorcycle = await this.motorcyclesService.create(createMotorcycleDto, file);
     return {
       message: 'Motorcycle created successfully',
@@ -140,7 +143,7 @@ export class MotorcyclesController {
   @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
-    @UploadedFile() file: any,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
     @Request() req: RequestWithUser,
   ) {
@@ -174,7 +177,8 @@ export class MotorcyclesController {
     // UUID: categoryId (se queda como string)
     // Log body transformado
     console.log('PATCH /motorcycles/:id BODY TRANSFORMADO:', transformedDto);
-    console.log('PATCH /motorcycles/:id FILE recibido:', file);
+    console.log('PATCH /motorcycles/:id FILES recibidos:', files);
+    const file = files && files.length > 0 ? files[0] : undefined;
     const motorcycle = await this.motorcyclesService.update(id, transformedDto, req.user.id, file);
     return {
       message: 'Motorcycle updated successfully',
