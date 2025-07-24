@@ -176,9 +176,13 @@ export class MotorcyclesService {
         }
       }
 
-      // Si se suben nuevas imágenes, agregarlas al array
+      // Si se suben nuevas imágenes, agregarlas al array (solo si son imágenes)
       if (files && files.length > 0) {
         for (const file of files) {
+          if (!file.mimetype.startsWith('image/')) {
+            this.logger.warn(`Archivo rechazado por tipo inválido: ${file.originalname} (${file.mimetype})`);
+            throw new Error('Invalid image file');
+          }
           const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
           if (Array.isArray(motorcycle.imageUrls)) {
             motorcycle.imageUrls.push(uploadedUrl);
