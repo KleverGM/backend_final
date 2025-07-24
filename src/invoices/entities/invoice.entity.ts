@@ -78,7 +78,7 @@ export class Invoice {
   @Column('uuid')
   saleId: string;
 
-  @ManyToOne(() => Customer, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Customer, { onDelete: 'CASCADE' })
   @JoinColumn()
   customer: Customer;
 

@@ -117,7 +117,7 @@ export class Sale {
   updatedAt: Date;
 
   // Relationships
-  @ManyToOne(() => Customer, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Customer, { onDelete: 'CASCADE' })
   @JoinColumn()
   customer: Customer;
 
