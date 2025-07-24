@@ -15,16 +15,14 @@ import {
   Request,
   UseInterceptors
 } from '@nestjs/common';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { UploadedFiles } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MotorcyclesService } from './motorcycles.service';
 import { CreateMotorcycleDto, UpdateMotorcycleDto } from './dto/motorcycle.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-  UploadedFiles
 import { UserRole } from '../auth/entities/user.entity';
 import { MotorcycleStatus } from './entities/motorcycle.entity';
 import { RequestWithUser } from '../common/interfaces/auth.interfaces';
@@ -44,17 +42,22 @@ export class MotorcyclesController {
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SELLER)
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(FilesInterceptor('file'))
   async uploadMotorcycleImage(
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     if (!files || files.length === 0) {
       return { message: 'No se proporcionó archivo', data: null };
     }
-    const imageUrl = await this.cloudinaryService.uploadImage(files[0].buffer, 'motorcycles');
+    // Subir todas las imágenes y devolver las URLs
+    const urls: string[] = [];
+    for (const file of files) {
+      const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+      urls.push(imageUrl);
+    }
     return {
-      message: 'Imagen de moto subida correctamente',
-      url: imageUrl,
+      message: 'Imágenes de moto subidas correctamente',
+      urls,
     };
   }
 
@@ -65,13 +68,12 @@ export class MotorcyclesController {
   @ApiOperation({ summary: 'Create a new motorcycle (Admin/Seller only)' })
   @ApiResponse({ status: 201, description: 'Motorcycle created successfully' })
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('file'))
   async create(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createMotorcycleDto: CreateMotorcycleDto
   ) {
-    const file = files && files.length > 0 ? files[0] : undefined;
-    const motorcycle = await this.motorcyclesService.create(createMotorcycleDto, file);
+    const motorcycle = await this.motorcyclesService.create(createMotorcycleDto, files);
     return {
       message: 'Motorcycle created successfully',
       data: motorcycle,
@@ -140,7 +142,7 @@ export class MotorcyclesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update motorcycle (Admin/Seller only)' })
   @ApiResponse({ status: 200, description: 'Motorcycle updated successfully' })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('file'))
   async update(
     @Param('id') id: string,
     @UploadedFiles() files: Express.Multer.File[],
@@ -178,8 +180,8 @@ export class MotorcyclesController {
     // Log body transformado
     console.log('PATCH /motorcycles/:id BODY TRANSFORMADO:', transformedDto);
     console.log('PATCH /motorcycles/:id FILES recibidos:', files);
-    const file = files && files.length > 0 ? files[0] : undefined;
-    const motorcycle = await this.motorcyclesService.update(id, transformedDto, req.user.id, file);
+    // Puedes pasar el array completo de files al service si quieres manejar varias imágenes
+    const motorcycle = await this.motorcyclesService.update(id, transformedDto, req.user.id, files);
     return {
       message: 'Motorcycle updated successfully',
       data: motorcycle,

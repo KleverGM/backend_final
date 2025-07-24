@@ -21,7 +21,7 @@ export class MotorcyclesService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createMotorcycleDto: CreateMotorcycleDto, file?: Express.Multer.File): Promise<Motorcycle> {
+  async create(createMotorcycleDto: CreateMotorcycleDto, files?: Express.Multer.File[]): Promise<Motorcycle> {
     try {
       // Verify category exists
       const category = await this.categoryRepository.findOne({
@@ -33,9 +33,11 @@ export class MotorcyclesService {
       }
 
       let imageUrls = createMotorcycleDto.imageUrls || [];
-      if (file) {
-        const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
-        imageUrls = [...imageUrls, uploadedUrl];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+          imageUrls = [...imageUrls, uploadedUrl];
+        }
       }
       const motorcycle = this.motorcycleRepository.create({
         ...createMotorcycleDto,
@@ -121,7 +123,7 @@ export class MotorcyclesService {
     }
   }
 
-  async update(id: string, updateMotorcycleDto: UpdateMotorcycleDto, userId?: string, file?: Express.Multer.File): Promise<Motorcycle> {
+  async update(id: string, updateMotorcycleDto: UpdateMotorcycleDto, userId?: string, files?: Express.Multer.File[]): Promise<Motorcycle> {
     try {
       const motorcycle = await this.findOne(id);
 
@@ -158,13 +160,15 @@ export class MotorcyclesService {
         }
       }
 
-      // Si se sube una nueva imagen, agregarla al array
-      if (file) {
-        const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
-        if (Array.isArray(motorcycle.imageUrls)) {
-          motorcycle.imageUrls.push(uploadedUrl);
-        } else {
-          motorcycle.imageUrls = [uploadedUrl];
+      // Si se suben nuevas imágenes, agregarlas al array
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const uploadedUrl = await this.cloudinaryService.uploadImage(file.buffer, 'motorcycles');
+          if (Array.isArray(motorcycle.imageUrls)) {
+            motorcycle.imageUrls.push(uploadedUrl);
+          } else {
+            motorcycle.imageUrls = [uploadedUrl];
+          }
         }
       }
       Object.assign(motorcycle, updateMotorcycleDto);
