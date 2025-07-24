@@ -37,7 +37,7 @@ export class MotorcyclesController {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
   /**
-   * Subir imagen de moto a Cloudinary 
+   * Subir imagen de moto a Cloudinary y devolver la URL
    */
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -144,8 +144,10 @@ export class MotorcyclesController {
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
     @Request() req: RequestWithUser,
   ) {
-    // Log para depuración: mostrar el valor recibido de categoryId
+    // Log para depuración: mostrar el body y archivo recibido
+    console.log('PATCH /motorcycles/:id BODY recibido:', updateMotorcycleDto);
     console.log('PATCH /motorcycles/:id categoryId recibido:', updateMotorcycleDto.categoryId);
+    console.log('PATCH /motorcycles/:id FILE recibido:', file);
     const motorcycle = await this.motorcyclesService.update(id, updateMotorcycleDto, req.user.id, file);
     return {
       message: 'Motorcycle updated successfully',
