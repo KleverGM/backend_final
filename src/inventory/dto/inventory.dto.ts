@@ -1,5 +1,18 @@
-// DTO para reabastecimiento de inventario
+
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  IsUUID,
+  IsDateString,
+  Min,
+  IsBoolean,
+} from 'class-validator';
+import { InventoryStatus } from '../entities/inventory.entity';
+
+// DTO para reabastecimiento de inventario
 
 export class RestockDto {
   @ApiProperty()
@@ -26,24 +39,13 @@ export class RestockDto {
   @IsString()
   notes?: string;
 }
+
 // Utilidad para limpiar números: solo dígitos
 export function cleanNumber(val: any) {
   if (val === undefined || val === null) return val;
   const digits = String(val).replace(/\D/g, '');
   return digits === '' ? undefined : Number(digits);
 }
-
-import {
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsOptional,
-  IsUUID,
-  IsDateString,
-  Min,
-  IsBoolean,
-} from 'class-validator';
-import { InventoryStatus } from '../entities/inventory.entity';
 
 export class CreateInventoryDto {
   @IsString()
