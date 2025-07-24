@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Motorcycle, MotorcycleStatus } from './entities/motorcycle.entity';
+import { Motorcycle, MotorcycleStatus, FuelType, TransmissionType } from './entities/motorcycle.entity';
 import { Category } from '../categories/entities/category.entity';
 import { CreateMotorcycleDto, UpdateMotorcycleDto } from './dto/motorcycle.dto';
 import { getErrorMessage } from '../common/types/error.types';
@@ -39,8 +39,24 @@ export class MotorcyclesService {
           imageUrls = [...imageUrls, uploadedUrl];
         }
       }
+      // Asignar valores por defecto si no vienen en el DTO
+      const {
+        displacement = 50,
+        power = 1,
+        fuelType = FuelType.GASOLINE,
+        transmission = TransmissionType.MANUAL,
+        color = 'Negro',
+        mileage = 0,
+        ...rest
+      } = createMotorcycleDto;
       const motorcycle = this.motorcycleRepository.create({
-        ...createMotorcycleDto,
+        ...rest,
+        displacement,
+        power,
+        fuelType,
+        transmission,
+        color,
+        mileage,
         imageUrls,
         category,
       });
@@ -171,7 +187,25 @@ export class MotorcyclesService {
           }
         }
       }
-      Object.assign(motorcycle, updateMotorcycleDto);
+      // Asignar valores por defecto si no vienen en el DTO
+      const {
+        displacement = motorcycle.displacement ?? 50,
+        power = motorcycle.power ?? 1,
+        fuelType = motorcycle.fuelType ?? FuelType.GASOLINE,
+        transmission = motorcycle.transmission ?? TransmissionType.MANUAL,
+        color = motorcycle.color ?? 'Negro',
+        mileage = motorcycle.mileage ?? 0,
+        ...rest
+      } = updateMotorcycleDto;
+      Object.assign(motorcycle, {
+        ...rest,
+        displacement,
+        power,
+        fuelType,
+        transmission,
+        color,
+        mileage,
+      });
       const updatedMotorcycle = await this.motorcycleRepository.save(motorcycle);
       this.logger.log(`Motorcycle updated with ID: ${id}`);
       return updatedMotorcycle;
