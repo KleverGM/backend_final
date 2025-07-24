@@ -65,17 +65,12 @@ export class ReviewService {
       this.logger.log(`Reseña creada con ID: ${savedReview.id}`);
       
       return {
-        ...savedReview,
-        customer: {
-          id: customer.id,
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-        },
-        motorcycle: {
-          id: motorcycle.id,
-          brand: motorcycle.brand,
-          model: motorcycle.model,
-        },
+        id: savedReview.id,
+        customerId: savedReview.customerId,
+        motorcycleId: savedReview.motorcycleId,
+        rating: savedReview.rating,
+        comment: savedReview.comment,
+        createdAt: savedReview.createdAt instanceof Date ? savedReview.createdAt.toISOString() : String(savedReview.createdAt),
       };
     } catch (error) {
       this.logger.error(`Error al crear reseña: ${getErrorMessage(error)}`);
@@ -110,17 +105,12 @@ export class ReviewService {
       this.logger.log(`Reseña actualizada con ID: ${reviewId}`);
       
       return {
-        ...updatedReview,
-        customer: {
-          id: review.customer.id,
-          firstName: review.customer.firstName,
-          lastName: review.customer.lastName,
-        },
-        motorcycle: {
-          id: review.motorcycle.id,
-          brand: review.motorcycle.brand,
-          model: review.motorcycle.model,
-        },
+        id: updatedReview.id,
+        customerId: updatedReview.customerId,
+        motorcycleId: updatedReview.motorcycleId,
+        rating: updatedReview.rating,
+        comment: updatedReview.comment,
+        createdAt: updatedReview.createdAt instanceof Date ? updatedReview.createdAt.toISOString() : String(updatedReview.createdAt),
       };
     } catch (error) {
       this.logger.error(`Error al actualizar reseña: ${getErrorMessage(error)}`);
@@ -166,17 +156,12 @@ export class ReviewService {
       });
 
       return reviews.map(review => ({
-        ...review,
-        customer: {
-          id: customer.id,
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-        },
-        motorcycle: {
-          id: review.motorcycle.id,
-          brand: review.motorcycle.brand,
-          model: review.motorcycle.model,
-        },
+        id: review.id,
+        customerId: review.customerId,
+        motorcycleId: review.motorcycleId,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt instanceof Date ? review.createdAt.toISOString() : String(review.createdAt),
       }));
     } catch (error) {
       this.logger.error(`Error al obtener reseñas: ${getErrorMessage(error)}`);
@@ -201,17 +186,12 @@ export class ReviewService {
       });
 
       return reviews.map(review => ({
-        ...review,
-        customer: {
-          id: review.customer.id,
-          firstName: review.customer.firstName,
-          lastName: review.customer.lastName,
-        },
-        motorcycle: {
-          id: motorcycle.id,
-          brand: motorcycle.brand,
-          model: motorcycle.model,
-        },
+        id: review.id,
+        customerId: review.customerId,
+        motorcycleId: review.motorcycleId,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt instanceof Date ? review.createdAt.toISOString() : String(review.createdAt),
       }));
     } catch (error) {
       this.logger.error(`Error al obtener reseñas de motocicleta: ${getErrorMessage(error)}`);

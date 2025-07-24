@@ -1,3 +1,31 @@
+// DTO para reabastecimiento de inventario
+import { ApiProperty } from '@nestjs/swagger';
+
+export class RestockDto {
+  @ApiProperty()
+  @IsNumber()
+  @Min(1)
+  set quantity(val: any) { this._quantity = cleanNumber(val); }
+  get quantity(): number { return this._quantity; }
+  private _quantity: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  set costPrice(val: any) { this._costPrice = cleanNumber(val); }
+  get costPrice(): number { return this._costPrice; }
+  private _costPrice: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  supplier?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
 // Utilidad para limpiar números: solo dígitos
 export function cleanNumber(val: any) {
   if (val === undefined || val === null) return val;
